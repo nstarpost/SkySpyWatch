@@ -14,6 +14,7 @@ There are currently severe bugs in this software that will be documented and fix
 
 There are a number of ways that you can contribute to this effort:
 - Set up an ADS-B receiver and configure it to feed data to [ADS-B Exchange](https://www.adsbexchange.com), particularly if you are in a rural area, outside of the US, or somewhere with weak coverage.
+- Donate money to [ADS-B Exchange](https://www.adsbexchange.com/donate/) so they can continue to make data available
 - Pull requests!
 - Advice, particularly on multiprocessing in Python3
 - Thoughts and comments on a machine learning approach
