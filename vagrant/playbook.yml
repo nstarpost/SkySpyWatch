@@ -1,0 +1,112 @@
+- hosts: all
+  tasks:
+  - name: update base packages
+    apt:
+      upgrade: yes
+      update_cache: yes
+  - name: install mongodb
+    apt:
+      name: mongodb
+      state: present
+      update_cache: yes
+    # pull rabbitmq-server from stretch so we get better admin tools
+  - name: install rabbitmq-server from stretch
+    apt: name=rabbitmq-server state=latest default_release=stretch
+  - name: enable rabbitmq management plugin
+    rabbitmq_plugin:
+      names: rabbitmq_management
+      state: enabled
+  - name: install redis
+    apt: name=redis-tools state=latest
+    apt: name=redis-server state=latest
+  - name: install build-essential
+    apt: name=build-essential state=present
+  - name: install libcurl4-openssl-dev
+    apt: name=libcurl4-openssl-dev state=present
+  - name: install python3
+    apt: name=python3 state=present
+  - name: install python3-pip
+    apt: name=python3-pip state=present
+  - name: install cython3
+    apt: name=cython3 state=present
+  - name: install python3-virtualenv
+    apt: name=python3-virtualenv state=present
+  - name: install python-virtualenv
+    apt: name=python-virtualenv state=present
+  - name: install python3-pycurl
+    apt: name=python3-pycurl state=present
+  - name: install python-pycurl
+    apt: name=python-pycurl state=present
+  - name: install virtualenv
+    apt: name=virtualenv state=present
+  - name: install git
+    apt: name=git state=present
+  - name: install curl
+    apt: name=curl state=present
+  - name: install libxslt1.1
+    apt: name=libxslt1.1 state=present
+  - name: install libxslt1-dev
+    apt: name=libxslt1-dev state=present
+  - name: install libxml2
+    apt: name=libxml2 state=present
+  - name: install libxml2-dev
+    apt: name=libxml2-dev state=present
+  - name: install libssl-dev
+    apt: name=libssl-dev state=present
+  - name: install mono-runtime
+    apt:
+      name: mono-runtime 
+      state: latest
+  - name: install mono-devel
+    apt:
+      name: mono-devel
+      state: latest
+    # the debian package for mongodb
+  - name: start mongodb
+    service:
+      name: mongodb
+      state: started
+  - name: start rabbitmq
+    service:
+      name: rabbitmq-server
+      state: started
+  - name: start redis
+    service:
+      name: redis-server
+      state: started
+  - name: pull flight analysis code from git
+    git:
+      repo: https://github.com/nstarpost/SkySpyWatch.git
+      version: master
+      dest: /opt/flight-rt/main
+  - name: pip install requirements
+    pip:
+      requirements: /opt/flight-rt/main/requirements.txt
+      virtualenv: /opt/flight-rt/venv
+      virtualenv_python: /usr/bin/python3
+  - name: make some directories
+    file: path=/opt/output-json state=directory
+    file: path=/opt/vrs-preview state=directory
+# If the following two downloads break, there are probably updated versions of VirtualRadarServer
+  - name: download vrs-preview from virtualradarserver.co.uk
+    get_url:
+      url: http://www.virtualradarserver.co.uk/Files/Preview/VirtualRadar.tar.gz
+      dest: /opt
+      sha256sum: 57d81610fde5994d6c2433b12fc9daac877c1fc63d4aa367e91c098b30e00f03
+  - name: download vrs web admin preview
+    get_url:
+      url: http://www.virtualradarserver.co.uk/Files/Preview/VirtualRadar.WebAdminPlugin.tar.gz
+      dest: /opt
+      sha256sum: b5eb37c017c92e2a930ded2f4fd9d77d0740b6f6b52acddad4a3dea9bf3ad961
+  - name: unarchive vrs-preview
+    unarchive:
+      remote_src: yes
+      src: /opt/VirtualRadar.tar.gz
+      dest: /opt/vrs-preview
+  - name: unarchive vrs web admin preview
+    unarchive:
+      remote_src: yes
+      src: /opt/VirtualRadar.WebAdminPlugin.tar.gz
+      dest: /opt/vrs-preview
+      #  - name: Set Virtual Radar Server admin user
+      #shell: mono /opt/vrs-preview/VirtualRadar.exe -nogui -createAdmin:admin -password:admin
